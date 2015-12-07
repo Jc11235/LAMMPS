@@ -38,7 +38,6 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <iomanip>
 
 using namespace LAMMPS_NS;
 using namespace MathConst;
@@ -77,7 +76,6 @@ PairAgni::~PairAgni()
 
 void PairAgni::compute(int eflag, int vflag)
 {
-  
   int i,j,ii,jj,inum,jnum,itype,jtype;
   double xtmp,ytmp,ztmp,delx,dely,delz,evdwl,fpair;
   double rsq,r2inv,r6inv,forcelj,factor_lj;
@@ -86,26 +84,9 @@ void PairAgni::compute(int eflag, int vflag)
   
   if(start == true)
   {
-<<<<<<< HEAD
     readUserFile(nTrain,atom1,atom2,Rc,sigma1,lambda,b,eta,xU,yU,alpha); //user input files
-=======
-    readUserFile(nTrain,Rc,sigma1,lambda,b,eta,xU,yU,alpha); //user input files
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
     start = false;
   }
-
-  /*cout<<"Rc: "<<Rc<<endl;
-  for(int i = 0; i < eta.size(); i++)
-  {
-    cout<<"eta: "<<eta.at(i)<<endl;
-  }
-  cout<<"sigma: "<<sigma1<<endl;
-  cout<<"lamda: "<<lambda<<endl;
-  cout<<"b: "<<b<<endl;
-  cout<<"nTrain: "<<nTrain<<endl;
-*/
-  
-
 
   evdwl = 0.0;
   if (eflag || vflag) ev_setup(eflag,vflag);
@@ -129,7 +110,7 @@ void PairAgni::compute(int eflag, int vflag)
  
 
   for (ii = 0; ii < inum; ii++) {
-    vector<double> Vx(eta.size()),Vy(eta.size()),Vz(eta.size()); 
+    vector<float> Vx(eta.size()),Vy(eta.size()),Vz(eta.size()); 
     for(int n = 0; n < eta.size(); n++)
     {
       Vx.at(n) = 0;
@@ -160,7 +141,7 @@ void PairAgni::compute(int eflag, int vflag)
 
      // cout<<"dx: "<<delx<<" dy: "<<dely<<" dz: "<<delz<<endl;
       //our stuff
-      double cF,wX,wY,wZ;
+      float cF,wX,wY,wZ;
 
       //cout<<"Rc: "<<cutsq[itype][jtype]<<endl;
       cF = .5*(cos((M_PI*sqrt(rsq))/sqrt(cutsq[itype][jtype])) + 1.0);
@@ -174,56 +155,34 @@ void PairAgni::compute(int eflag, int vflag)
         Vy.at(n) += wY*cF*exp(-(eta.at(n)*rsq));
         Vz.at(n) += wZ*cF*exp(-(eta.at(n)*rsq)); 
       }
-    }
-
+    } 
 
 
     //our stuff - Force prediction
-    //cout<<"atom#: "<<i<<" x: "<<xtmp<<" y: "<<ytmp<<" z: "<<ztmp<<endl;
+
     for(int n = 0; n < nTrain; n++)
     {
-      double kx = 0.0;
-      double ky = 0.0;
-      double kz = 0.0;
+      kx = 0.0;
+      ky = 0.0;
+      kz = 0.0;
 
       for(int m = 0; m < eta.size(); m++)
       {        
         kx += pow((Vx.at(m) - xU[m][n]), 2.0);  
         ky += pow((Vy.at(m) - xU[m][n]), 2.0);
-        kz += pow((Vz.at(m) - xU[m][n]), 2.0);
-        //cout<<" xU: "<<xU[m][n]<<endl;
+        kz += pow((Vz.at(m) - xU[m][n]), 2.0); 
       }
-      
-      //cout<<" alpha: "<<alpha.at(n)<<"  y:"<<yU.at(n)<<endl;
 
-      
-      
-      //cout<<"alpha: "<<alpha.at(n)<<endl;
-      f[i][0] += alpha.at(n)*exp(-kx/(2.0*pow(sigma1,2.0)));
-      f[i][1] += alpha.at(n)*exp(-ky/(2.0*pow(sigma1,2.0)));
-      f[i][2] += alpha.at(n)*exp(-kz/(2.0*pow(sigma1,2.0)));
-      //cout<<setprecision(15)<<"fi0: "<<alpha.at(n)*exp(-kx/(2.0*pow(sigma1,2.0)))<<endl;
-     // cout<<"kx = "<<kx<<" ky = "<<ky<<"kz = "<<kz<<endl;
+      //cout<<"kx = "<<kx<<" ky = "<<ky<<"kz = "<<kz<<endl;
+      f[i][0] += alpha.at(n)*exp(-kx/(2*pow(sigma1,2.0)));
+      f[i][1] += alpha.at(n)*exp(-ky/(2*pow(sigma1,2.0)));
+      f[i][2] += alpha.at(n)*exp(-kz/(2*pow(sigma1,2.0)));
+
     }
-    //cout<<"fi0: "<<f[i][0]<<endl;
     f[i][0] += b;
     f[i][1] += b;
     f[i][2] += b;
-
-
-    /*for(int m = 0; m < eta.size(); m++)
-      {
-        cout<<"Vx: " <<Vx[m]<<" Vy: "<<Vy[m]<<" Vz: "<<Vz[m]<<endl;
-      } */  
-    //cout<<"fx: " <<f[i][0]<<" fy: "<<f[i][1]<<" fz: "<<f[i][2]<<endl;
-
-    //cout<<"\n\n";
   }
-  //end of our stuff
-
-
-
-
 
   if (vflag_fdotr) virial_fdotr_compute();
 }
@@ -528,7 +487,6 @@ void PairAgni::settings(int narg, char **arg)
       for (j = i+1; j <= atom->ntypes; j++)
         if (setflag[i][j]) cut[i][j] = cut_global;
   }
-
 }
 
 /* ----------------------------------------------------------------------
@@ -537,9 +495,6 @@ void PairAgni::settings(int narg, char **arg)
 
 void PairAgni::coeff(int narg, char **arg)
 {
-  inputFile = arg[2]; //sets the user input filename from in.eam
-
-
   if (narg < 4 || narg > 5)
     error->all(FLERR,"Incorrect args for pair coefficients");
   if (!allocated) allocate();
@@ -548,11 +503,11 @@ void PairAgni::coeff(int narg, char **arg)
   force->bounds(arg[0],atom->ntypes,ilo,ihi);
   force->bounds(arg[1],atom->ntypes,jlo,jhi);
 
-  double epsilon_one = force->numeric(FLERR,arg[3]); //changed from arg[2] to arg[3] since filename is now arg[2]
-  double sigma_one = force->numeric(FLERR,arg[4]);//changed from arg[3] to arg[4] 
+  double epsilon_one = force->numeric(FLERR,arg[2]);
+  double sigma_one = force->numeric(FLERR,arg[3]);
 
   double cut_one = cut_global;
-  if (narg == 6) cut_one = force->numeric(FLERR,arg[5]); //changed from narg = 5 to narg = 6, arg[4] to arg[5]
+  if (narg == 5) cut_one = force->numeric(FLERR,arg[4]);
 
   int count = 0;
   for (int i = ilo; i <= ihi; i++) {
@@ -706,31 +661,23 @@ double PairAgni::init_one(int i, int j)
   return cut[i][j];
 }
 //reads in the user input file, reads values in as references to objects
-<<<<<<< HEAD
-void PairAgni::readUserFile(int &nTrain,int &atom1,int &atom2,double &Rc,double &sigma,double &lambda,double &b,vector<double> &eta,vector< vector<double> > &xU,vector<double> &yU,vector<double> &aplha)
-=======
-void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,double &b,vector<double> &eta,vector< vector<double> > &xU,vector<double> &yU,vector<double> &aplha)
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
+void PairAgni::readUserFile(int &nTrain,int &atom1,int &atom2,float &Rc,float &sigma,float &lambda,float &b,vector<float> &eta,vector< vector<float> > &xU,vector<float> &yU,vector<float> &aplha)
 {
-  ifstream infile(inputFile.c_str());//input file
+  ifstream infile("test.foo");//input file
 
   string line = "";  //initializes line
   int count = 0; //line countre  
   bool changeJ; //changes entered 0's to avoid erasing
   bool tempBreak; //boolean for deleting the first element of the item vector
   bool resizeXU = true;
-  bool varStart = true; //temp boolean to start 
-  double j; //temp variables for string to double values
-  int xUStart = 1000000; //arbitrarily large value to ensure this only happens when it needs to
+  float j;
   int xUcount = 0;
-  string varSet = ""; 
+  
 
   while(getline(infile,line))
   {    
     changeJ = false;
-    tempBreak = false;
-    varStart = true;
-    varSet = "";
+    tempBreak = false;  
 
     if(line != "clear" && line.size() > 0)//allows the user to clear and ignores empty lines
     {
@@ -749,13 +696,8 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
       {        
         j = atof(elements.at(i).c_str()); //converts a const *char to a float
         
-        if(i == 0 && varStart == true)
-        {
-          varSet = elements.at(0); //stores var name 
-          varStart = false; //ensures thi is only done once per line
-        }          
 
-        if(varSet == "Dataset")
+        if(count == 4)
         {
           vector<string> atomsP;
 
@@ -773,11 +715,7 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
           atomsP.push_back(s1); 
           atomsP.push_back(s2);
 
-<<<<<<< HEAD
           if(atomsP.at(0) == atomsP.at(1))
-=======
-          /*if(atomsP.at(0) == atomsP.at(1))
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
           {
             atom1 = 1;
             atom2 = atom1;
@@ -787,10 +725,6 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
             atom1 = 1;
             atom2 = atom1 + 1;
           }
-<<<<<<< HEAD
-=======
-          */
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
         }
         if(elements.at(i) == "0.0") //changes the value of added 0's to avoid be erased
         {
@@ -812,21 +746,19 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
         {
           if(changeJ == true)//restores the original value of the changed 0's
             j = atof(elements.at(i).c_str());
-          if(varSet == "Rc") //Rc
+          if(count == 6) //Rc
             Rc =  j; 
-          else if(varSet == "eta") //eta
+          else if(count == 7) //eta
             eta.push_back(j);
-          else if(varSet == "sigma")//sigma
+          else if(count == 8)//sigma
             sigma = j;
-          else if(varSet == "lambda")//lambda
+          else if(count == 9)//lambda
             lambda = j;
-          else if(varSet == "b") //b
+          else if(count == 10) //b
             b = j;
-          else if(varSet == "n_train")//n-train
+          else if(count == 11)//n-train
             nTrain = (int) j;
-          else if(varSet == "endVar")
-            xUStart = count + 1;  //sets when xU will start          
-          else if(count > xUStart && count <= xUStart + nTrain)//xU,yU,alpha
+          else if(count > 12 && count <= 13+nTrain)//xU,yU,alpha
           {             
             if(i < elements.size()-2)//xU
             {
@@ -843,8 +775,11 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
               for(int k = 0; k < eta.size(); k++)
               {
                 if(i == k)
+                {
                   xU[k].at(xUcount) = j; //adds j to the correct xU index
+                }                  
               }
+
             }
             else if(i == elements.size()-2)//yU
               yU.push_back(j);
@@ -853,43 +788,11 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
           }
         }
       }
-      if(count > xUStart)
+      if(count > 13)
         xUcount++;
     }
     count++;
   }
-
-  //send variables to nodes through MPI
-  MPI_Bcast(&Rc,1,MPI_DOUBLE,0,world);//Rc
-  MPI_Bcast(&sigma,1,MPI_DOUBLE,0,world);//sigma
-  MPI_Bcast(&lambda,1,MPI_DOUBLE,0,world);//lambda
-  MPI_Bcast(&b,1,MPI_DOUBLE,0,world);//b
-  MPI_Bcast(&nTrain,1,MPI_INT,0,world);//ntrain
-  for(int k = 0; k < xU.size(); k++)
-  {
-  	for(int p = 0; p < xU.at(0).size(); p++)
-  	{
-		MPI_Bcast(&xU[k][p],1,MPI_DOUBLE,0,world);//xU
-  	}
-  }  
-  for(int p = 0; p < yU.size(); p++)
-  {
-	MPI_Bcast(&yU[p],1,MPI_DOUBLE,0,world);//yU
-  }  
-  for(int k = 0; k < alpha.size(); k++)
-  {
-	MPI_Bcast(&alpha[k],1,MPI_DOUBLE,0,world);//alpha
-  }
-  for(int k = 0; k < eta.size(); k++)
-  {
-  	MPI_Bcast(&eta[k],1,MPI_DOUBLE,0,world);//eta
-<<<<<<< HEAD
-  } 
-
- 	
-=======
-  }  	
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
 }
 /* ----------------------------------------------------------------------
    proc 0 writes to restart file
