@@ -62,13 +62,12 @@ PairAgni::~PairAgni()
     memory->destroy(cutsq);
 
     memory->destroy(cut);
-    memory->destroy(epsilon);
-    memory->destroy(sigma);
-    memory->destroy(lj1);
-    memory->destroy(lj2);
-    memory->destroy(lj3);
-    memory->destroy(lj4);
-    memory->destroy(offset);
+   // memory->destroy(epsilon);
+    //memory->destroy(sigma);
+
+    //memory->destroy(offset);
+
+    //memory->destroy(nTrain);
 
   }
 }
@@ -86,26 +85,9 @@ void PairAgni::compute(int eflag, int vflag)
   
   if(start == true)
   {
-<<<<<<< HEAD
-    readUserFile(nTrain,atom1,atom2,Rc,sigma1,lambda,b,eta,xU,yU,alpha); //user input files
-=======
-    readUserFile(nTrain,Rc,sigma1,lambda,b,eta,xU,yU,alpha); //user input files
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
+    readUserFile(); //user input files
     start = false;
   }
-
-  /*cout<<"Rc: "<<Rc<<endl;
-  for(int i = 0; i < eta.size(); i++)
-  {
-    cout<<"eta: "<<eta.at(i)<<endl;
-  }
-  cout<<"sigma: "<<sigma1<<endl;
-  cout<<"lamda: "<<lambda<<endl;
-  cout<<"b: "<<b<<endl;
-  cout<<"nTrain: "<<nTrain<<endl;
-*/
-  
-
 
   evdwl = 0.0;
   if (eflag || vflag) ev_setup(eflag,vflag);
@@ -176,8 +158,6 @@ void PairAgni::compute(int eflag, int vflag)
       }
     }
 
-
-
     //our stuff - Force prediction
     //cout<<"atom#: "<<i<<" x: "<<xtmp<<" y: "<<ytmp<<" z: "<<ztmp<<endl;
     for(int n = 0; n < nTrain; n++)
@@ -194,9 +174,7 @@ void PairAgni::compute(int eflag, int vflag)
         //cout<<" xU: "<<xU[m][n]<<endl;
       }
       
-      //cout<<" alpha: "<<alpha.at(n)<<"  y:"<<yU.at(n)<<endl;
-
-      
+      //cout<<" alpha: "<<alpha.at(n)<<"  y:"<<yU.at(n)<<endl;      
       
       //cout<<"alpha: "<<alpha.at(n)<<endl;
       f[i][0] += alpha.at(n)*exp(-kx/(2.0*pow(sigma1,2.0)));
@@ -210,7 +188,6 @@ void PairAgni::compute(int eflag, int vflag)
     f[i][1] += b;
     f[i][2] += b;
 
-
     /*for(int m = 0; m < eta.size(); m++)
       {
         cout<<"Vx: " <<Vx[m]<<" Vy: "<<Vy[m]<<" Vz: "<<Vz[m]<<endl;
@@ -221,10 +198,6 @@ void PairAgni::compute(int eflag, int vflag)
   }
   //end of our stuff
 
-
-
-
-
   if (vflag_fdotr) virial_fdotr_compute();
 }
 
@@ -232,256 +205,21 @@ void PairAgni::compute(int eflag, int vflag)
 
 void PairAgni::compute_inner()
 {
-  /*int i,j,ii,jj,inum,jnum,itype,jtype;
-  double xtmp,ytmp,ztmp,delx,dely,delz,fpair;
-  double rsq,r2inv,r6inv,forcelj,factor_lj,rsw;
-  int *ilist,*jlist,*numneigh,**firstneigh;
-
-  double **x = atom->x;
-  double **f = atom->f;
-  int *type = atom->type;
-  int nlocal = atom->nlocal;
-  double *special_lj = force->special_lj;
-  int newton_pair = force->newton_pair;
-
-  inum = listinner->inum;
-  ilist = listinner->ilist;
-  numneigh = listinner->numneigh;
-  firstneigh = listinner->firstneigh;
-
-  double cut_out_on = cut_respa[0];
-  double cut_out_off = cut_respa[1];
-
-  double cut_out_diff = cut_out_off - cut_out_on;
-  double cut_out_on_sq = cut_out_on*cut_out_on;
-  double cut_out_off_sq = cut_out_off*cut_out_off;
-
-  // loop over neighbors of my atoms
-
-  for (ii = 0; ii < inum; ii++) {
-    i = ilist[ii];
-    xtmp = x[i][0];
-    ytmp = x[i][1];
-    ztmp = x[i][2];
-    itype = type[i];
-    jlist = firstneigh[i];
-    jnum = numneigh[i];
-
-    for (jj = 0; jj < jnum; jj++) {
-      j = jlist[jj];
-      factor_lj = special_lj[sbmask(j)];
-      j &= NEIGHMASK;
-
-      delx = xtmp - x[j][0];
-      dely = ytmp - x[j][1];
-      delz = ztmp - x[j][2];
-      rsq = delx*delx + dely*dely + delz*delz;
-
-      if (rsq < cut_out_off_sq) {
-        r2inv = 1.0/rsq;
-        r6inv = r2inv*r2inv*r2inv;
-        jtype = type[j];
-        forcelj = r6inv * (lj1[itype][jtype]*r6inv - lj2[itype][jtype]);
-        fpair = factor_lj*forcelj*r2inv;
-        if (rsq > cut_out_on_sq) {
-          rsw = (sqrt(rsq) - cut_out_on)/cut_out_diff;
-          fpair *= 1.0 - rsw*rsw*(3.0 - 2.0*rsw);
-        }
-
-        f[i][0] += delx*fpair;
-        f[i][1] += dely*fpair;
-        f[i][2] += delz*fpair;
-        if (newton_pair || j < nlocal) {
-          f[j][0] -= delx*fpair;
-          f[j][1] -= dely*fpair;
-          f[j][2] -= delz*fpair;
-        }
-      }
-    }
-  }*/
+  
 }
 
 /* ---------------------------------------------------------------------- */
 
 void PairAgni::compute_middle()
 {
-  /*
-  int i,j,ii,jj,inum,jnum,itype,jtype;
-  double xtmp,ytmp,ztmp,delx,dely,delz,fpair;
-  double rsq,r2inv,r6inv,forcelj,factor_lj,rsw;
-  int *ilist,*jlist,*numneigh,**firstneigh;
-
-  double **x = atom->x;
-  double **f = atom->f;
-  int *type = atom->type;
-  int nlocal = atom->nlocal;
-  double *special_lj = force->special_lj;
-  int newton_pair = force->newton_pair;
-
-  inum = listmiddle->inum;
-  ilist = listmiddle->ilist;
-  numneigh = listmiddle->numneigh;
-  firstneigh = listmiddle->firstneigh;
-
-  double cut_in_off = cut_respa[0];
-  double cut_in_on = cut_respa[1];
-  double cut_out_on = cut_respa[2];
-  double cut_out_off = cut_respa[3];
-
-  double cut_in_diff = cut_in_on - cut_in_off;
-  double cut_out_diff = cut_out_off - cut_out_on;
-  double cut_in_off_sq = cut_in_off*cut_in_off;
-  double cut_in_on_sq = cut_in_on*cut_in_on;
-  double cut_out_on_sq = cut_out_on*cut_out_on;
-  double cut_out_off_sq = cut_out_off*cut_out_off;
-
-  // loop over neighbors of my atoms
-
-  for (ii = 0; ii < inum; ii++) {
-    i = ilist[ii];
-    xtmp = x[i][0];
-    ytmp = x[i][1];
-    ztmp = x[i][2];
-    itype = type[i];
-    jlist = firstneigh[i];
-    jnum = numneigh[i];
-
-    for (jj = 0; jj < jnum; jj++) {
-      j = jlist[jj];
-      factor_lj = special_lj[sbmask(j)];
-      j &= NEIGHMASK;
-
-      delx = xtmp - x[j][0];
-      dely = ytmp - x[j][1];
-      delz = ztmp - x[j][2];
-      rsq = delx*delx + dely*dely + delz*delz;
-
-      if (rsq < cut_out_off_sq && rsq > cut_in_off_sq) {
-        r2inv = 1.0/rsq;
-        r6inv = r2inv*r2inv*r2inv;
-        jtype = type[j];
-        forcelj = r6inv * (lj1[itype][jtype]*r6inv - lj2[itype][jtype]);
-        fpair = factor_lj*forcelj*r2inv;
-        if (rsq < cut_in_on_sq) {
-          rsw = (sqrt(rsq) - cut_in_off)/cut_in_diff;
-          fpair *= rsw*rsw*(3.0 - 2.0*rsw);
-        }
-        if (rsq > cut_out_on_sq) {
-          rsw = (sqrt(rsq) - cut_out_on)/cut_out_diff;
-          fpair *= 1.0 + rsw*rsw*(2.0*rsw - 3.0);
-        }
-
-        f[i][0] += delx*fpair;
-        f[i][1] += dely*fpair;
-        f[i][2] += delz*fpair;
-        if (newton_pair || j < nlocal) {
-          f[j][0] -= delx*fpair;
-          f[j][1] -= dely*fpair;
-          f[j][2] -= delz*fpair;
-        }
-      }
-    }
-  }*/
+  
 }
 
 /* ---------------------------------------------------------------------- */
 
 void PairAgni::compute_outer(int eflag, int vflag)
 {
- /* int i,j,ii,jj,inum,jnum,itype,jtype;
-  double xtmp,ytmp,ztmp,delx,dely,delz,evdwl,fpair;
-  double rsq,r2inv,r6inv,forcelj,factor_lj,rsw;
-  int *ilist,*jlist,*numneigh,**firstneigh;
-
-  evdwl = 0.0;
-  if (eflag || vflag) ev_setup(eflag,vflag);
-  else evflag = 0;
-
-  double **x = atom->x;
-  double **f = atom->f;
-  int *type = atom->type;
-  int nlocal = atom->nlocal;
-  double *special_lj = force->special_lj;
-  int newton_pair = force->newton_pair;
-
-  inum = listouter->inum;
-  ilist = listouter->ilist;
-  numneigh = listouter->numneigh;
-  firstneigh = listouter->firstneigh;
-
-  double cut_in_off = cut_respa[2];
-  double cut_in_on = cut_respa[3];
-
-  double cut_in_diff = cut_in_on - cut_in_off;
-  double cut_in_off_sq = cut_in_off*cut_in_off;
-  double cut_in_on_sq = cut_in_on*cut_in_on;
-
-  // loop over neighbors of my atoms
-
-  for (ii = 0; ii < inum; ii++) {
-    i = ilist[ii];
-    xtmp = x[i][0];
-    ytmp = x[i][1];
-    ztmp = x[i][2];
-    itype = type[i];
-    jlist = firstneigh[i];
-    jnum = numneigh[i];
-
-    for (jj = 0; jj < jnum; jj++) {
-      j = jlist[jj];
-      factor_lj = special_lj[sbmask(j)];
-      j &= NEIGHMASK;
-
-      delx = xtmp - x[j][0];
-      dely = ytmp - x[j][1];
-      delz = ztmp - x[j][2];
-      rsq = delx*delx + dely*dely + delz*delz;
-      jtype = type[j];
-
-      if (rsq < cutsq[itype][jtype]) {
-        if (rsq > cut_in_off_sq) {
-          r2inv = 1.0/rsq;
-          r6inv = r2inv*r2inv*r2inv;
-          forcelj = r6inv * (lj1[itype][jtype]*r6inv - lj2[itype][jtype]);
-          fpair = factor_lj*forcelj*r2inv;
-          if (rsq < cut_in_on_sq) {
-            rsw = (sqrt(rsq) - cut_in_off)/cut_in_diff;
-            fpair *= rsw*rsw*(3.0 - 2.0*rsw);
-          }
-
-          f[i][0] += delx*fpair;
-          f[i][1] += dely*fpair;
-          f[i][2] += delz*fpair;
-          if (newton_pair || j < nlocal) {
-            f[j][0] -= delx*fpair;
-            f[j][1] -= dely*fpair;
-            f[j][2] -= delz*fpair;
-          }
-        }
-
-        if (eflag) {
-          r2inv = 1.0/rsq;
-          r6inv = r2inv*r2inv*r2inv;
-          evdwl = r6inv*(lj3[itype][jtype]*r6inv-lj4[itype][jtype]) -
-            offset[itype][jtype];
-          evdwl *= factor_lj;
-        }
-
-        if (vflag) {
-          if (rsq <= cut_in_off_sq) {
-            r2inv = 1.0/rsq;
-            r6inv = r2inv*r2inv*r2inv;
-            forcelj = r6inv * (lj1[itype][jtype]*r6inv - lj2[itype][jtype]);
-            fpair = factor_lj*forcelj*r2inv;
-          } else if (rsq < cut_in_on_sq)
-            fpair = factor_lj*forcelj*r2inv;
-        }
-
-        if (evflag) ev_tally(i,j,nlocal,newton_pair,
-                             evdwl,0.0,fpair,delx,dely,delz);
-      }
-    }
-  }*/
+ 
 }
 
 /* ----------------------------------------------------------------------
@@ -501,13 +239,10 @@ void PairAgni::allocate()
   memory->create(cutsq,n+1,n+1,"pair:cutsq");
 
   memory->create(cut,n+1,n+1,"pair:cut");
-  memory->create(epsilon,n+1,n+1,"pair:epsilon");
-  memory->create(sigma,n+1,n+1,"pair:sigma");
-  memory->create(lj1,n+1,n+1,"pair:lj1");
-  memory->create(lj2,n+1,n+1,"pair:lj2");
-  memory->create(lj3,n+1,n+1,"pair:lj3");
-  memory->create(lj4,n+1,n+1,"pair:lj4");
-  memory->create(offset,n+1,n+1,"pair:offset");
+  //memory->create(epsilon,n+1,n+1,"pair:epsilon");
+ // memory->create(sigma,n+1,n+1,"pair:sigma");
+
+  //memory->create(offset,n+1,n+1,"pair:offset");
 }
 
 /* ----------------------------------------------------------------------
@@ -557,8 +292,8 @@ void PairAgni::coeff(int narg, char **arg)
   int count = 0;
   for (int i = ilo; i <= ihi; i++) {
     for (int j = MAX(jlo,i); j <= jhi; j++) {
-      epsilon[i][j] = epsilon_one;
-      sigma[i][j] = sigma_one;
+      //epsilon[i][j] = epsilon_one;
+      //sigma[i][j] = sigma_one;
       cut[i][j] = cut_one;
       setflag[i][j] = 1;
       count++;
@@ -650,27 +385,18 @@ void PairAgni::init_list(int id, NeighList *ptr)
 double PairAgni::init_one(int i, int j)
 {
   if (setflag[i][j] == 0) {
-    epsilon[i][j] = mix_energy(epsilon[i][i],epsilon[j][j],
-                               sigma[i][i],sigma[j][j]);
-    sigma[i][j] = mix_distance(sigma[i][i],sigma[j][j]);
+    //epsilon[i][j] = mix_energy(epsilon[i][i],epsilon[j][j],
+                               //sigma[i][i],sigma[j][j]);
+    //sigma[i][j] = mix_distance(sigma[i][i],sigma[j][j]);
     cut[i][j] = mix_distance(cut[i][i],cut[j][j]);
   }
 
-  lj1[i][j] = 48.0 * epsilon[i][j] * pow(sigma[i][j],12.0);
-  lj2[i][j] = 24.0 * epsilon[i][j] * pow(sigma[i][j],6.0);
-  lj3[i][j] = 4.0 * epsilon[i][j] * pow(sigma[i][j],12.0);
-  lj4[i][j] = 4.0 * epsilon[i][j] * pow(sigma[i][j],6.0);
-
   if (offset_flag) {
-    double ratio = sigma[i][j] / cut[i][j];
-    offset[i][j] = 4.0 * epsilon[i][j] * (pow(ratio,12.0) - pow(ratio,6.0));
-  } else offset[i][j] = 0.0;
+    //double ratio = sigma[i][j] / cut[i][j];
+    //offset[i][j] = 4.0 * epsilon[i][j] * (pow(ratio,12.0) - pow(ratio,6.0));
+  } //else offset[i][j] = 0.0;
 
-  lj1[j][i] = lj1[i][j];
-  lj2[j][i] = lj2[i][j];
-  lj3[j][i] = lj3[i][j];
-  lj4[j][i] = lj4[i][j];
-  offset[j][i] = offset[i][j];
+  //offset[j][i] = offset[i][j];
 
   // check interior rRESPA cutoff
 
@@ -692,38 +418,37 @@ double PairAgni::init_one(int i, int j)
     }
     MPI_Allreduce(count,all,2,MPI_DOUBLE,MPI_SUM,world);
 
-    double sig2 = sigma[i][j]*sigma[i][j];
-    double sig6 = sig2*sig2*sig2;
+    //double sig2 = sigma[i][j]*sigma[i][j];
+    //double sig6 = sig2*sig2*sig2;
     double rc3 = cut[i][j]*cut[i][j]*cut[i][j];
     double rc6 = rc3*rc3;
     double rc9 = rc3*rc6;
-    etail_ij = 8.0*MY_PI*all[0]*all[1]*epsilon[i][j] *
-      sig6 * (sig6 - 3.0*rc6) / (9.0*rc9);
-    ptail_ij = 16.0*MY_PI*all[0]*all[1]*epsilon[i][j] *
-      sig6 * (2.0*sig6 - 3.0*rc6) / (9.0*rc9);
+    //etail_ij = 8.0*MY_PI*all[0]*all[1]*epsilon[i][j] *
+     // sig6 * (sig6 - 3.0*rc6) / (9.0*rc9);
+   // ptail_ij = 16.0*MY_PI*all[0]*all[1]*epsilon[i][j] *
+     // sig6 * (2.0*sig6 - 3.0*rc6) / (9.0*rc9);
   }
 
   return cut[i][j];
 }
 //reads in the user input file, reads values in as references to objects
-<<<<<<< HEAD
-void PairAgni::readUserFile(int &nTrain,int &atom1,int &atom2,double &Rc,double &sigma,double &lambda,double &b,vector<double> &eta,vector< vector<double> > &xU,vector<double> &yU,vector<double> &aplha)
-=======
-void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,double &b,vector<double> &eta,vector< vector<double> > &xU,vector<double> &yU,vector<double> &aplha)
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
+void PairAgni::readUserFile()
 {
   ifstream infile(inputFile.c_str());//input file
 
   string line = "";  //initializes line
-  int count = 0; //line countre  
+  string varSet = ""; //determines where the xU values will start
+
   bool changeJ; //changes entered 0's to avoid erasing
   bool tempBreak; //boolean for deleting the first element of the item vector
-  bool resizeXU = true;
+  bool resizeXU = true; //resizes xU based on nTrain
   bool varStart = true; //temp boolean to start 
+  
   double j; //temp variables for string to double values
+  
   int xUStart = 1000000; //arbitrarily large value to ensure this only happens when it needs to
   int xUcount = 0;
-  string varSet = ""; 
+  int count = 0; //line countre
 
   while(getline(infile,line))
   {    
@@ -742,7 +467,7 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
 
       while(getline(ss,item,delim))
       {
-        elements.push_back(item);
+        elements.push_back(item); //pushes the line to the elements vector
       }
       //erases verctor elements that correspond to spaces and initialize variables
       for(int i = 0; i < elements.size(); i++)
@@ -753,51 +478,29 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
         {
           varSet = elements.at(0); //stores var name 
           varStart = false; //ensures thi is only done once per line
-        }          
+        }
 
-        if(varSet == "Dataset")
+        //determines all different elements that are in the system
+        if(varSet == "Dataset" && i == 0)
         {
-          vector<string> atomsP;
+          	for(int e = 0; e < elements.size(); e++)
+          	{
+          		string buf; // Have a buffer string
+    			stringstream ss(elements.at(e)); // Insert the string into a stream
 
-          string newString(elements.at(1));
-          string sP(elements.at(0));
-          string totalString = sP + " " + newString;
+    			if(ss >> buf)
+        			elementList.push_back(buf); //pushes the elements name to the element list
+          	} 
 
-          size_t pos1 = totalString.find(" ");
-          string s = totalString.substr(pos1+1);
-
-          size_t pos2 = s.find("-");
-          string s1 = s.substr(0,2);
-          string s2 = s.substr(3,4);
-
-          atomsP.push_back(s1); 
-          atomsP.push_back(s2);
-
-<<<<<<< HEAD
-          if(atomsP.at(0) == atomsP.at(1))
-=======
-          /*if(atomsP.at(0) == atomsP.at(1))
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
-          {
-            atom1 = 1;
-            atom2 = atom1;
-          }
-          else
-          {
-            atom1 = 1;
-            atom2 = atom1 + 1;
-          }
-<<<<<<< HEAD
-=======
-          */
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
+          	elementList.erase(elementList.begin()); //gets rid of the word Dataset               	
         }
         if(elements.at(i) == "0.0") //changes the value of added 0's to avoid be erased
         {
           j = 1.0;
           changeJ = true;
         } 
-        if(i == 0 && count != 4 && tempBreak == false) //erases the first element
+        //if(i == 0 && count != 4 && tempBreak == false && count <= xUStart) //erases the first element
+        if(i == 0 && count != 4 && tempBreak == false)
         {
             elements.erase(elements.begin());
             i--;//modifies the index to avoid segmentation faults
@@ -817,7 +520,7 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
           else if(varSet == "eta") //eta
             eta.push_back(j);
           else if(varSet == "sigma")//sigma
-            sigma = j;
+            sigma1= j;
           else if(varSet == "lambda")//lambda
             lambda = j;
           else if(varSet == "b") //b
@@ -849,11 +552,11 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
             else if(i == elements.size()-2)//yU
               yU.push_back(j);
             else if(i == elements.size()-1)//alpha
-              aplha.push_back(j);
+              alpha.push_back(j);
           }
         }
       }
-      if(count > xUStart)
+      if(count > xUStart) //counts until nTrain
         xUcount++;
     }
     count++;
@@ -861,7 +564,7 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
 
   //send variables to nodes through MPI
   MPI_Bcast(&Rc,1,MPI_DOUBLE,0,world);//Rc
-  MPI_Bcast(&sigma,1,MPI_DOUBLE,0,world);//sigma
+  MPI_Bcast(&sigma1,1,MPI_DOUBLE,0,world);//sigma
   MPI_Bcast(&lambda,1,MPI_DOUBLE,0,world);//lambda
   MPI_Bcast(&b,1,MPI_DOUBLE,0,world);//b
   MPI_Bcast(&nTrain,1,MPI_INT,0,world);//ntrain
@@ -883,13 +586,9 @@ void PairAgni::readUserFile(int &nTrain,double &Rc,double &sigma,double &lambda,
   for(int k = 0; k < eta.size(); k++)
   {
   	MPI_Bcast(&eta[k],1,MPI_DOUBLE,0,world);//eta
-<<<<<<< HEAD
   } 
 
  	
-=======
-  }  	
->>>>>>> 541b383ffe018e8b434769d490c478250837aab8
 }
 /* ----------------------------------------------------------------------
    proc 0 writes to restart file
@@ -904,9 +603,7 @@ void PairAgni::write_restart(FILE *fp)
     for (j = i; j <= atom->ntypes; j++) {
       fwrite(&setflag[i][j],sizeof(int),1,fp);
       if (setflag[i][j]) {
-        fwrite(&epsilon[i][j],sizeof(double),1,fp);
-        fwrite(&sigma[i][j],sizeof(double),1,fp);
-        fwrite(&cut[i][j],sizeof(double),1,fp);
+     
       }
     }
 }
@@ -927,14 +624,8 @@ void PairAgni::read_restart(FILE *fp)
       if (me == 0) fread(&setflag[i][j],sizeof(int),1,fp);
       MPI_Bcast(&setflag[i][j],1,MPI_INT,0,world);
       if (setflag[i][j]) {
-        if (me == 0) {
-          fread(&epsilon[i][j],sizeof(double),1,fp);
-          fread(&sigma[i][j],sizeof(double),1,fp);
-          fread(&cut[i][j],sizeof(double),1,fp);
-        }
-        MPI_Bcast(&epsilon[i][j],1,MPI_DOUBLE,0,world);
-        MPI_Bcast(&sigma[i][j],1,MPI_DOUBLE,0,world);
-        MPI_Bcast(&cut[i][j],1,MPI_DOUBLE,0,world);
+        if (me == 0) {         
+        }       
       }
     }
 }
@@ -976,8 +667,8 @@ void PairAgni::read_restart_settings(FILE *fp)
 
 void PairAgni::write_data(FILE *fp)
 {
-  for (int i = 1; i <= atom->ntypes; i++)
-    fprintf(fp,"%d %g %g\n",i,epsilon[i][i],sigma[i][i]);
+  //for (int i = 1; i <= atom->ntypes; i++)
+    //fprintf(fp,"%d %g %g\n",i,epsilon[i][i],sigma[i][i]);
 }
 
 /* ----------------------------------------------------------------------
@@ -988,7 +679,8 @@ void PairAgni::write_data_all(FILE *fp)
 {
   for (int i = 1; i <= atom->ntypes; i++)
     for (int j = i; j <= atom->ntypes; j++)
-      fprintf(fp,"%d %d %g %g %g\n",i,j,epsilon[i][j],sigma[i][j],cut[i][j]);
+      //fprintf(fp,"%d %d %g %g %g\n",i,j,epsilon[i][j],sigma[i][j],cut[i][j]);
+    	int t = 0;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -997,7 +689,7 @@ double PairAgni::single(int i, int j, int itype, int jtype, double rsq,
                          double factor_coul, double factor_lj,
                          double &fforce)
 {
-  double r2inv,r6inv,forcelj,philj;
+  /*double r2inv,r6inv,forcelj,philj;
 
   r2inv = 1.0/rsq;
   r6inv = r2inv*r2inv*r2inv;
@@ -1006,7 +698,8 @@ double PairAgni::single(int i, int j, int itype, int jtype, double rsq,
 
   philj = r6inv*(lj3[itype][jtype]*r6inv-lj4[itype][jtype]) -
     offset[itype][jtype];
-  return factor_lj*philj;
+    */
+  return 0;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1014,7 +707,7 @@ double PairAgni::single(int i, int j, int itype, int jtype, double rsq,
 void *PairAgni::extract(const char *str, int &dim)
 {
   dim = 2;
-  if (strcmp(str,"epsilon") == 0) return (void *) epsilon;
-  if (strcmp(str,"sigma") == 0) return (void *) sigma;
+  //if (strcmp(str,"epsilon") == 0) return (void *) epsilon;
+  //if (strcmp(str,"sigma") == 0) return (void *) sigma;
   return NULL;
 }

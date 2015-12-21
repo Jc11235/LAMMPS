@@ -40,7 +40,7 @@ class PairAgni : public Pair {
   void init_style();
   void init_list(int, class NeighList *);
   double init_one(int, int);
-  void readUserFile(int &,double &,double &,double &,double &,vector<double> &,vector< vector<double> > &,vector<double> &,vector<double> &);
+  void readUserFile();
   void write_restart(FILE *);
   void read_restart(FILE *);
   void write_restart_settings(FILE *);
@@ -57,26 +57,22 @@ class PairAgni : public Pair {
 
  protected:
   double cut_global;
-  double **cut;
-  double **epsilon,**sigma;
-  double **lj1,**lj2,**lj3,**lj4,**offset;
+  double **cut; //DON'T TOUCH THIS, WILL MESS UP ATOMS!!!!!!!!
+  //double **epsilon,**sigma;//NO CHANGE
+  //double **lj1,**lj2,**lj3,**lj4,**offset;//NO CHANGE
   double *cut_respa;
 
-   //user variables
-  //char **tempArg;
+  //user variables
   string inputFile;
   double Rc,sigma1,lambda,b;
   int nTrain;
-  vector<int> elementList;//for an experimental build
+  vector<string> elementList;//for an experimental build
   vector<double> eta,yU,alpha;
   vector< vector<double> > xU;
 
   bool start;
 
   virtual void allocate();
-
-
-
 };
 
 }

@@ -1,5 +1,8 @@
 # LAMMPS
 
+#Update 1.1.1 (12/21/2015 @10:38am)
+-The file reader now supports multi-elemental systems. 
+
 #Update 1.1.05 (12/7/2015 @9:38am)
 -The file reader now supports multi-elemental systems. 
 
